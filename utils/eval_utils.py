@@ -353,7 +353,7 @@ def eval_with_validation(model, EMB, opt, answer_vocab):
     pred = pred.data.numpy()
 
     # save the pred to check
-    np.savetxt("/home/lshi/vqa/prediction.csv", pred, delimiter=",")
+    np.savetxt("/home/lshi/vqa/pred_log_softmax.csv", pred, delimiter=",")
     
     # pred_ind = pred.argsort(axis=1)[:, -opt.MAX_WORDS_IN_ANSWER: ]
     # # with open("/home/lshi/vqa/vocab/question.json", "r") as f:
