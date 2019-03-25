@@ -7,6 +7,8 @@ from gensim.models import KeyedVectors # load word2vev
 import json
 from data_provider import VQADataProvider
 
+root_path = os.path.join(os.getenv("HOME"), "vqa")
+
 # folder = "../../data/train/VQAMed2018Train-images"
 # img_list = os.listdir(folder)
 
@@ -38,7 +40,7 @@ from data_provider import VQADataProvider
 # print("all sizes")
 # print(img_size_set)
 def image_size_list(folder):
-	folder_name = os.path.join("/home/lshi/vqa", folder, "VQAMed2018%s-images" % folder)
+	folder_name = os.path.join(root_path, folder, "VQAMed2018%s-images" % folder)
 	img_size_set = set()
 	img_list = os.listdir(folder_name)
 
@@ -49,7 +51,7 @@ def image_size_list(folder):
 
 def img_ratio_check(folder, ratio):
 	# ratio should be a integer
-	folder_name = os.path.join("/home/lshi/vqa", folder, "VQAMed2018%s-images" % folder)
+	folder_name = os.path.join(root_path, folder, "VQAMed2018%s-images" % folder)
 	img_list = os.listdir(folder_name)
 	out_ratio_ls = []
 	for t in img_list:
@@ -63,9 +65,9 @@ def img_ratio_check(folder, ratio):
 
 
 def image_name_check(folder):
-	img_folder = os.path.join("..", folder, "VQAMed2018%s-images" % folder)
+	img_folder = os.path.join(root_path, folder, "VQAMed2018%s-images" % folder)
 	# img_file = os.path.join("..", folder, "VQAMed2018%s-images-List.txt" % folder)
-	qa_file =os.path.join("..", folder, "VQAMed2018%s-QA.csv" % folder)
+	qa_file =os.path.join(root_path, folder, "VQAMed2018%s-QA.csv" % folder)
 
 	img_list = os.listdir(img_folder)
 	img_list = set(img_list)
@@ -101,10 +103,10 @@ def img_size_pixel_check(file):
 
 
 def check_embedding(embedding_file, vocab_file, qa_file):
-	EMBEDDING = KeyedVectors.load_word2vec_format(os.path.join("../embedding", embedding_file), binary=True).wv.vocab
+	EMBEDDING = KeyedVectors.load_word2vec_format(os.path.join(root_path, "embedding", embedding_file), binary=True).wv.vocab
 	
 	voc_counter = 0
-	with open(os.path.join("../vocab", vocab_file), "r") as f:
+	with open(os.path.join(root_path, "vocab", vocab_file), "r") as f:
 		vocab = json.load(f)
 	for w in vocab:
 		if(w in EMBEDDING):
@@ -112,7 +114,7 @@ def check_embedding(embedding_file, vocab_file, qa_file):
 
 	tot_counter = 0
 	word_fre = {}
-	with open(os.path.join("../train", qa_file), "r") as f:
+	with open(os.path.join(root_path, "train", qa_file), "r") as f:
 		QA = csv.reader(f, delimiter='\t', quotechar='\n')
 		for row in QA:
 			ws = VQADataProvider.seq_to_list(row[2])

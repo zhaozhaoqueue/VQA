@@ -3,8 +3,8 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 import torchvision
-import sys
-sys.path.append("..")
+# import sys
+# sys.path.append("..")
 
 '''
 Pre-trained Image NN

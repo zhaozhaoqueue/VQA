@@ -11,7 +11,8 @@ from gensim.models import KeyedVectors # load word2vec
 import torch.utils.data as data
 import os
 import sys
-sys.path.append("/home/lshi/vqa")
+root_path = os.path.join(os.getenv("HOME"), "vqa")
+sys.path.append(root_path)
 import config # pre-process image
 
 KEY_SEPARATOR = '/'
@@ -43,7 +44,7 @@ class VQADataProvider:
         #     self.question_vocab = json.load(f)  # questions vocabulary dictionary {(<'word'>, <index>}
         # with open('%s/answer_vocab.json' % folder, 'r') as f:
         #     self.answer_vocab = json.load(f)  # answers vocabulary dictionary {(<'word'>, <index>}
-        folder = "/home/lshi/vqa/vocab"
+        folder = os.path.join(root_path, "vocab")
         with open("%s/question.json" % folder, "r") as f:
             self.question_vocab = json.load(f)
         with open("%s/answer.json" % folder, "r") as f:
@@ -81,7 +82,7 @@ class VQADataProvider:
         qdic, adic, qa_pair = {}, {}, {}
         # assert data_split in config.DATA_PATHS.keys(), 'unknown data split'
         # with open(config.DATA_PATHS[data_split]['QA_file']) as csvfile:
-        with open("/home/lshi/vqa/"+data_split+KEY_SEPARATOR+"VQAMed2018%s-QA.csv"%data_split) as csvfile:
+        with open(os.path.join(root_path, data_split, "VQAMed2018%s-QA.csv"%data_split)) as csvfile:
             QA = csv.reader(csvfile, delimiter='\t', quotechar='\n')
             for rows in QA:
                 qdic[data_split + KEY_SEPARATOR + str(rows[0])] = \
@@ -273,7 +274,7 @@ class VQADataProvider:
             t_qvec, t_q_cvec, t_q_MED_matrix = self.qlist_to_vec(q_list, qatype='question')
             t_avec, t_a_cvec, t_a_MED_matrix = self.qlist_to_vec(a_list, qatype='answer')
 
-            t_img = self.loader(os.path.join("/home/lshi/vqa", self.mode, 'VQAMed2018train-images', '%s.jpg' % i_id))
+            t_img = self.loader(os.path.join(root_path, self.mode, 'VQAMed2018train-images', '%s.jpg' % i_id))
             if self.transform is not None:
                 t_ivec = self.transform(t_img)
             else:
@@ -369,7 +370,7 @@ class VQADataset(data.Dataset):
         # self.qdic, self.adic, _ = VQADataProvider.load_data(mode)
         # # qdic: {"train/indexInQAfile": {'qstr': question, 'iid': image_file_name}}
         # # adic: {"train/indexInQAfile": {'astr': answer, 'iid': image_file_name}}
-        self.q_a_i_df = pd.read_csv(os.path.join("/home/lshi/vqa", self.mode, "VQAMed2018%s-QA.csv"%self.mode), delimiter="\t", header=None, names=["index", "img_id", "question", "answer"])[["img_id", "question", "answer"]]
+        self.q_a_i_df = pd.read_csv(os.path.join(root_path, self.mode, "VQAMed2018%s-QA.csv"%self.mode), delimiter="\t", header=None, names=["index", "img_id", "question", "answer"])[["img_id", "question", "answer"]]
         # # shuffle the data
         # self.q_a_i_df = self.orig_df.sample(frac=1.0, replace=False, random_state=None)
         self.img_ids = self.q_a_i_df["img_id"]
@@ -378,9 +379,9 @@ class VQADataset(data.Dataset):
         # later, write the transform function in data provider script and use more complex transformation
         self.transform = config.transform
         self.data_len = self.q_a_i_df.shape[0]
-        with open("/home/lshi/vqa/vocab/answer.json", "r") as f:
+        with open(os.path.join(root_path, "vocab/answer.json"), "r") as f:
             self.answer_vocab = json.load(f)
-        self.img_foder = os.path.join("/home/lshi/vqa", self.mode, "VQAMed2018%s-images"%self.mode)
+        self.img_foder = os.path.join(root_path, self.mode, "VQAMed2018%s-images"%self.mode)
 
 
     def __getitem__(self, index):
@@ -392,7 +393,7 @@ class VQADataset(data.Dataset):
         q_EMB_matrix = VQADataProvider.qlist_to_matrix(q_list, self.opt.MAX_WORDS_IN_QUESTION, self.EMB, embedding_size=self.EMBEDDING_SIZE)
 
         # get image matrix (3 x 224 x 224)
-        image_path = os.path.join("/home/lshi/vqa", self.mode, 'VQAMed2018%s-images'%self.mode, '%s.jpg'%self.img_ids[index])
+        image_path = os.path.join(root_path, self.mode, 'VQAMed2018%s-images'%self.mode, '%s.jpg'%self.img_ids[index])
         image = Image.open(image_path).convert('RGB')
         img_matrix = self.transform(image)
 

@@ -1,9 +1,11 @@
 from data_provider import VQADataProvider
 import re
 import json
-# import sys
+import sys
+import os
 
-# sys.path.append("/home/lshi/vqa")
+root_path = os.path.join(os.getenv("HOME"), "vqa")
+sys.path.append(root_path)
 
 
 def make_vocab(instance_dic, vocab_size=-1):
@@ -82,8 +84,8 @@ def make_vocab_files(opt):
 
 if __name__ == "__main__":
     q_vocab, a_vocab = make_vocab_files(1)
-    q_file = "../vocab/question.json"
-    a_file = "../vocab/answer.json"
+    q_file = os.path.join(root_path, "vocab/question.json")
+    a_file = os.path.join(root_path, "vocab/answer.json")
     print("save question_vocab to %s" % q_file)
     with open(q_file, "w") as f:
         json.dump(q_vocab, f)

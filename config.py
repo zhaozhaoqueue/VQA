@@ -1,8 +1,11 @@
 import argparse
 from PIL import Image
 import numpy as np
+import os
 
-DATA_PATHS = "..."
+root_path = os.path.join(os.getenv("HOME"), "vqa")
+
+# DATA_PATHS = "..."
 
 # input: a Image object
 # return: numpy array 3d
@@ -53,7 +56,7 @@ def parse_opt():
     parser.add_argument('--IMG_FEAT_SIZE', type=int, default=49)
 
     parser.add_argument('--EPOCH', type=int, default=3) # self defined
-    parser.add_argument('--EMBEDDING_PATH', type=str, default="/home/lshi/vqa/embedding/BioWordVec_PubMed_MIMICIII_d200.vec.bin")
+    parser.add_argument('--EMBEDDING_PATH', type=str, default=os.path.join(root_path, "embedding/BioWordVec_PubMed_MIMICIII_d200.vec.bin"))
 
     args = parser.parse_args()
     return args

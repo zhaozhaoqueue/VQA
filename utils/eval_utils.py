@@ -23,6 +23,8 @@ from scipy import spatial
 from numpy.random import choice
 from utils import evaluator_unit
 
+root_path = os.path.join(os.getenv("HOME"), "vqa")
+
 plt.switch_backend('agg')
 
 
@@ -319,7 +321,7 @@ def eval_with_validation(model, EMB, opt, answer_vocab):
     # img_matrix = Variable(img_matrix).cuda().float()
 
     # q_a_i_df = pd.read_csv("/home/lshi/vqa/valid/VQAMed2018valid-QA.csv", delimiter="\t", header=None, names=["index", "img_id", "question", "answer"])[["img_id", "question", "answer"]]
-    q_a_i_df = pd.read_csv("/home/lshi/vqa/valid/VQAMed2018valid-QA.csv", delimiter="\t", header=None, names=["q_id", "img_id", "question", "answer"])
+    q_a_i_df = pd.read_csv(os.path.join(root_path, "valid/VQAMed2018valid-QA.csv"), delimiter="\t", header=None, names=["q_id", "img_id", "question", "answer"])
     qa_num = q_a_i_df.shape[0]
     
     qs_MED_matrix = np.zeros((qa_num, opt.MAX_WORDS_IN_QUESTION, 200))
@@ -331,7 +333,7 @@ def eval_with_validation(model, EMB, opt, answer_vocab):
         q_matrix = VQADataProvider.qlist_to_matrix(q_list, opt.MAX_WORDS_IN_QUESTION, EMB)
         qs_MED_matrix[i] = q_matrix
 
-        image_path = "/home/lshi/vqa/valid/VQAMed2018valid-images/%s.jpg"%q_a_i_df["img_id"][i]
+        image_path = os.path.join(root_path, "valid/VQAMed2018valid-images/%s.jpg"%q_a_i_df["img_id"][i])
         image = Image.open(image_path).convert('RGB')
         img_matrix = config.transform(image)
         imgs_matrix[i] = img_matrix
@@ -353,7 +355,7 @@ def eval_with_validation(model, EMB, opt, answer_vocab):
     pred = pred.data.numpy()
 
     # save the pred to check
-    np.savetxt("/home/lshi/vqa/pred_log_softmax.csv", pred, delimiter=",")
+    np.savetxt(os.path.join(root_path, "pred_log_softmax.csv"), pred, delimiter=",")
     
     # pred_ind = pred.argsort(axis=1)[:, -opt.MAX_WORDS_IN_ANSWER: ]
     # # with open("/home/lshi/vqa/vocab/question.json", "r") as f:
@@ -381,11 +383,11 @@ def eval_with_validation(model, EMB, opt, answer_vocab):
     # save the prediction to a csv file
     pred_df = q_a_i_df[["q_id", "img_id"]]
     pred_df["pred"] = pred_list
-    pred_df.to_csv("/home/lshi/vqa/valid/prediction.csv", sep="\t", header=None, index=None)
+    pred_df.to_csv(os.path.join(root_path, "valid/prediction.csv"), sep="\t", header=None, index=None)
 
     # compute two metrics
-    gt_file_path = "/home/lshi/vqa/valid/VQAMed2018valid-QA.csv"
-    submission_file_path = "/home/lshi/vqa/valid/prediction.csv"
+    gt_file_path = os.path.join(root_path, "valid/VQAMed2018valid-QA.csv")
+    submission_file_path = os.path.join(root_path, "valid/prediction.csv")
     _client_payload = {}
     _client_payload["submission_file_path"] = submission_file_path
     evaluator = evaluator_unit.VqaMedEvaluator(gt_file_path)

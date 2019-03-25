@@ -1,9 +1,13 @@
 import numpy as np
 import datetime
 import sys
-sys.path.append("/home/lshi/vqa")
-sys.path.append("/home/lshi/vqa/utils")
-sys.path.append("/home/lshi/vqa/models")
+import os
+
+root_path = os.getcwd()
+
+# sys.path.append("/home/lshi/vqa")
+# sys.path.append("/home/lshi/vqa/utils")
+# sys.path.append("/home/lshi/vqa/models")
 
 import torch
 import torch.nn.functional as F
@@ -18,8 +22,8 @@ from utils.data_provider import VQADataset
 # from utils.eval_utils import exec_validation
 from utils.eval_utils import eval_with_validation
 
-# set folder
-folder = "vqa/train"
+# # set folder
+# folder = "vqa/train"
 
 # read hyper parameters from configuration
 opt = config.parse_opt()
