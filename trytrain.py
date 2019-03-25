@@ -141,9 +141,9 @@ for epoch in range(opt.EPOCH):
 		#           results.append([step, c_mean_loss, test_loss, acc_overall, acc_per_ques, acc_per_ans])
 		#           best_result_idx = np.array([x[3] for x in results]).argmax()
 		#           print ('Best accuracy of', results[best_result_idx][3], 'was at iteration', results[best_result_idx][0])
-	bleu = eval_with_validation(model, train_data.EMB, opt, train_data.answer_vocab)
-	results.append((epoch, bleu))
-	print("%d epoch bleu score on validation dataset: %d" %(epoch, bleu))
+	result = eval_with_validation(model, train_data.EMB, opt, train_data.answer_vocab)
+	results.append((epoch, result))
+	print("%d epoch score on validation dataset: %d" %(epoch, result))
 
 print("Training finished")
-print("bleu score for each epoch: ", results)
+print("bleu and wbss score for each epoch: ", results)
