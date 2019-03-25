@@ -23,8 +23,11 @@ def parse_opt():
     parser.add_argument('--BATCH_SIZE', type=int, default=32) #
     parser.add_argument('--VAL_BATCH_SIZE', type=int, default=32) #
     parser.add_argument('--NUM_OUTPUT_UNITS', type=int, default=3000) # this should be equal to the size of vocabulary size
-    parser.add_argument('--MAX_WORDS_IN_QUESTION', type=int, default=15) #
-    parser.add_argument('--MAX_WORDS_IN_ANSWER', type=int, default=8) # self defined
+    # according to the analysis of length of questions and answers, when max_words_in_question = 18, it could cover 90% instances;
+    # when max_words_in_answer = 13, it also could cover 90% instances
+    # change the max words in question and answer
+    parser.add_argument('--MAX_WORDS_IN_QUESTION', type=int, default=18) #
+    parser.add_argument('--MAX_WORDS_IN_ANSWER', type=int, default=13) # self defined
     parser.add_argument('--MAX_ITERATIONS', type=int, default=100000) #
     parser.add_argument('--PRINT_INTERVAL', type=int, default=10) #
     parser.add_argument('--TESTDEV_INTERVAL', type=int, default=100000)
