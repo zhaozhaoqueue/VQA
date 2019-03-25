@@ -8,6 +8,9 @@ root_path = os.getcwd()
 # sys.path.append("/home/lshi/vqa")
 # sys.path.append("/home/lshi/vqa/utils")
 # sys.path.append("/home/lshi/vqa/models")
+sys.path.append(root_path)
+sys.path.append(os.path.join(root_path, "utils"))
+sys.path.append(os.path.join(root_path, "models"))
 
 import torch
 import torch.nn.functional as F
