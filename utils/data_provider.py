@@ -370,12 +370,12 @@ class VQADataset(data.Dataset):
         # self.qdic, self.adic, _ = VQADataProvider.load_data(mode)
         # # qdic: {"train/indexInQAfile": {'qstr': question, 'iid': image_file_name}}
         # # adic: {"train/indexInQAfile": {'astr': answer, 'iid': image_file_name}}
-        self.q_a_i_df = pd.read_csv(os.path.join(root_path, self.mode, "VQAMed2018%s-QA.csv"%self.mode), delimiter="\t", header=None, names=["index", "img_id", "question", "answer"])[["img_id", "question", "answer"]]
+        self.q_a_i_df = pd.read_csv(os.path.join(root_path, self.mode, "VQAMed2018%s-QA.csv"%self.mode), delimiter="\t", header=None, names=["index", "img_id", "question", "answer"])
         # # shuffle the data
         # self.q_a_i_df = self.orig_df.sample(frac=1.0, replace=False, random_state=None)
-        self.img_ids = self.q_a_i_df["img_id"]
-        self.questions = self.q_a_i_df["question"]
-        self.answer = self.q_a_i_df["answer"]
+        self.img_ids = self.q_a_i_df["img_id"].tolist()
+        self.questions = self.q_a_i_df["question"].tolist()
+        self.answer = self.q_a_i_df["answer"].tolist()
         # later, write the transform function in data provider script and use more complex transformation
         self.transform = config.transform
         self.data_len = self.q_a_i_df.shape[0]
@@ -406,6 +406,3 @@ class VQADataset(data.Dataset):
 
     def __len__(self):
         return self.data_len
-
-
-

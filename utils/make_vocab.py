@@ -78,7 +78,7 @@ def make_vocab_files(opt):
     print ('Making answer vocab from train .......')  # opt.ANSWER_VOCAB_SPACE = 'train' (default)
     _, adic, _ = VQADataProvider.load_data("train")
     # answer_vocab_tmp = make_vocab(adic, opt.ANSWER_VOCAB_SIZE)  # opt.NUM_OUTPUT_UNITS = 3000 (default)
-    answer_vocab_tmp = make_vocab(adic, 3000)  # opt.NUM_OUTPUT_UNITS = 3000 (default)
+    answer_vocab_tmp = make_vocab(adic)  # opt.NUM_OUTPUT_UNITS = 3000 (default)
     return question_vocab_tmp, answer_vocab_tmp
 
 

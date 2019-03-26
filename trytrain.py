@@ -31,6 +31,9 @@ from utils.eval_utils import eval_with_validation
 # read hyper parameters from configuration
 opt = config.parse_opt()
 
+# set gpu device
+torch.cuda.set_device(opt.TRAIN_GPU_ID)
+
 def adjust_learning_rate(optimizer, decay_rate):
     for param_group in optimizer.param_groups:
         param_group['lr'] = param_group['lr'] * decay_rate
@@ -51,16 +54,16 @@ def convert_answer_vec(row):
 
 # provide data
 train_data 	= VQADataset(mode="train", opt=opt)
-train_loader = data.DataLoader(dataset=train_data, shuffle=False, batch_size=opt.BATCH_SIZE, num_workers=1)
+train_loader = data.DataLoader(dataset=train_data, shuffle=True, batch_size=opt.BATCH_SIZE, num_workers=1)
 
 # construct model
 model = mfh_coatt_Med(opt)
 
 # use GPU
-# model.cuda()
+model.cuda()
 
 optimizer = torch.optim.Adam(model.parameters(), lr=opt.INIT_LEARNING_RATE)
-loss_func = nn.KLDivLoss()
+loss_func = nn.KLDivLoss(reduction="batchmean")
 train_loss = np.zeros((opt.EPOCH, opt.MAX_ITERATIONS + 1))
 results = []
 for epoch in range(opt.EPOCH):
@@ -68,6 +71,8 @@ for epoch in range(opt.EPOCH):
 	for step, (q_EMB_matrix, img_matrix, a_vec) in enumerate(train_loader):
 		model.train()
 		print("\n%d step detail" % step)
+		print("answer vector")
+		# print(a_vec[1, :])
 		'''
 		data prepare
 		'''
@@ -110,28 +115,36 @@ for epoch in range(opt.EPOCH):
 		# print("image matrix shape with batch size: ", img_matrix.shape)
 		# print("answer vector shape with batch size: ", a_vec.shape)
 
-		q_EMB_matrix = Variable(q_EMB_matrix).float()
-		img_matrix = Variable(img_matrix).float()
-		a_vec = Variable(a_vec).float()
+
+
+		# CPU
+		# q_EMB_matrix = Variable(q_EMB_matrix).float()
+		# img_matrix = Variable(img_matrix).float()
+		# a_vec = Variable(a_vec).float()
+
+		# GPU
+		q_EMB_matrix = Variable(q_EMB_matrix).cuda().float()
+		img_matrix = Variable(img_matrix).cuda().float()
+		a_vec = Variable(a_vec).cuda().float()
 
 		optimizer.zero_grad()
 		pred = model(img_matrix, q_EMB_matrix, mode="train")
 		loss = loss_func(pred, a_vec)
 		loss.backward()
 		optimizer.step()
-		train_loss[epoch, step] = loss.data.numpy()
+		train_loss[epoch, step] = loss.item()
 
 		# adjust lr
 		if(step%opt.DECAY_STEPS == 0 and step != 0):
 			adjust_learning_rate(optimizer, opt.DECAY_RATE)
 		if(step%10==0 and step!=0):
 			print("%d step, loss is "%step)
-			print(loss.data.numpy(), "\n")
+			print(loss.item(), "\n")
 
 		if(step%opt.PRINT_INTERVAL == 0 and step != 0):
 			now = str(datetime.datetime.now())
 			c_mean_loss = train_loss[epoch, step-opt.PRINT_INTERVAL:step].mean()/opt.BATCH_SIZE
-			print('{}\tTrain Epoch {}\t: {}\tIter: {}\tLoss: {:.4f}'.format(now, epoch, step, c_mean_loss))
+			print('{} Train Epoch{}: Iter{}: Loss: {:.4f}'.format(now, epoch, step, c_mean_loss))
 
 		# # validate accuracy
 		# # this step takes too many memory
@@ -150,7 +163,7 @@ for epoch in range(opt.EPOCH):
 		#           print ('Best accuracy of', results[best_result_idx][3], 'was at iteration', results[best_result_idx][0])
 	result = eval_with_validation(model, train_data.EMB, opt, train_data.answer_vocab)
 	results.append((epoch, result))
-	print("%d epoch score on validation dataset: %d" %(epoch, result))
+	print("%d epoch score on validation dataset: " % epoch, result)
 
 print("Training finished")
 print("bleu and wbss score for each epoch: ", results)

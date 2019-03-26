@@ -156,5 +156,7 @@ class mfh_coatt_Med(nn.Module):
 
         mfb_o23_l2 = torch.cat((mfb_o2_l2, mfb_o3_l2), 1)               # b_size x (MFB_OUT_DIM * MFH_ORDER)
         prediction = self.Linear_predict(mfb_o23_l2)
+        # add a sigmoid function
+        prediction = F.sigmoid(prediction)
         prediction = F.log_softmax(prediction, dim=1)
         return prediction

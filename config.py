@@ -20,12 +20,12 @@ def transform(img):
 def parse_opt():
     parser = argparse.ArgumentParser()
     # Data input settings
-    parser.add_argument('--TRAIN_GPU_ID', type=int, default=0)
+    parser.add_argument('--TRAIN_GPU_ID', type=int, default=1)
     parser.add_argument('--TEST_GPU_ID', type=int, default=3)
     parser.add_argument('--SEED', type=int, default=-1)
-    parser.add_argument('--BATCH_SIZE', type=int, default=32) #
+    parser.add_argument('--BATCH_SIZE', type=int, default=8) #
     parser.add_argument('--VAL_BATCH_SIZE', type=int, default=32) #
-    parser.add_argument('--NUM_OUTPUT_UNITS', type=int, default=3000) # this should be equal to the size of vocabulary size
+    parser.add_argument('--NUM_OUTPUT_UNITS', type=int, default=3193) # this should be equal to the size of vocabulary size
     # according to the analysis of length of questions and answers, when max_words_in_question = 18, it could cover 90% instances;
     # when max_words_in_answer = 13, it also could cover 90% instances
     # change the max words in question and answer
@@ -55,7 +55,7 @@ def parse_opt():
     parser.add_argument('--NUM_QUESTION_GLIMPSE', type=int, default=2)
     parser.add_argument('--IMG_FEAT_SIZE', type=int, default=49)
 
-    parser.add_argument('--EPOCH', type=int, default=3) # self defined
+    parser.add_argument('--EPOCH', type=int, default=20) # self defined
     parser.add_argument('--EMBEDDING_PATH', type=str, default=os.path.join(root_path, "embedding/BioWordVec_PubMed_MIMICIII_d200.vec.bin"))
 
     args = parser.parse_args()

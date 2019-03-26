@@ -295,8 +295,11 @@ def eval_with_validation(model, EMB, opt, answer_vocab):
     #             else:
     #                 MED_matrix[i] = self.MED[w]
     #     return MED_matrix
+    
     model.eval()
-    loss_func = nn.NLLLoss()
+    # loss_func = nn.NLLLoss()
+    # loss_func = nn.KLDivLoss()
+
     # simple validation metrics computation, load all validation data one time
     # later change the data provider to load validation data with batch
     # MED = VQADataProvider.loadMED_Embedding(opt.EMBEDDING_PATH)
@@ -339,37 +342,36 @@ def eval_with_validation(model, EMB, opt, answer_vocab):
         imgs_matrix[i] = img_matrix
         gt.append(q_a_i_df["answer"][i])
 
-    # ans_voc = {}
-    # for k, v in answer_vocab.items():
-    #     ans_voc[v] = k
-    
-    # for sampling answer
-    ans_voc_sampling = []
-    for k, _ in answer_vocab.items():
-        ans_voc_sampling.append(k)
 
-    # use CPU
-    qs_MED_matrix = Variable(torch.from_numpy(qs_MED_matrix)).float()
-    imgs_matrix = Variable(torch.from_numpy(imgs_matrix)).float()
+    
+
+    # # use CPU
+    # qs_MED_matrix = Variable(torch.from_numpy(qs_MED_matrix)).float()
+    # imgs_matrix = Variable(torch.from_numpy(imgs_matrix)).float()
+    # pred = model(ivec=imgs_matrix, q_MED_Matrix=qs_MED_matrix, mode="val")
+    # use GPU
+    qs_MED_matrix = Variable(torch.from_numpy(qs_MED_matrix)).cuda().float()
+    imgs_matrix = Variable(torch.from_numpy(imgs_matrix)).cuda().float()
     pred = model(ivec=imgs_matrix, q_MED_Matrix=qs_MED_matrix, mode="val")
-    pred = pred.data.numpy()
+    
+    # pred = pred.cpu().data.numpy()
+    # switch to cpu
+    pred = pred.cpu().detach().numpy()
+
 
     # save the pred to check
-    np.savetxt(os.path.join(root_path, "pred_log_softmax.csv"), pred, delimiter=",")
+    # np.savetxt(os.path.join(root_path, "pred_log_softmax.csv"), pred, delimiter=",")
     
-    # pred_ind = pred.argsort(axis=1)[:, -opt.MAX_WORDS_IN_ANSWER: ]
+
+    ans_voc = {}
+    for k, v in answer_vocab.items():
+        ans_voc[v] = k
+    pred_ind = np.exp(pred).argsort(axis=1)[:, -opt.MAX_WORDS_IN_ANSWER: ]
+
     # # with open("/home/lshi/vqa/vocab/question.json", "r") as f:
     # #     q_vocab = json.load(f)
-    # for i in range(pred_ind.shape[0]):
-    #     words = [ans_voc[x] for x in pred_ind[i, :]]
-    #     pred_list.append(" ".join(words))
-
-    # use sampling method to product the predicted answer
-    pred_positive = np.exp(pred)
-
-    for i in range(pred.shape[0]):
-        a_idx = choice(opt.NUM_OUTPUT_UNITS, size=opt.MAX_WORDS_IN_ANSWER, replace=False, p=pred_positive[i, :])
-        words = [ans_voc_sampling[x] for x in a_idx]
+    for i in range(pred_ind.shape[0]):
+        words = [ans_voc[x] for x in pred_ind[i, :]]
         if("<END>" in words):
             words = words[:words.index("<END>")]
         if("<START>" in words):
@@ -380,13 +382,38 @@ def eval_with_validation(model, EMB, opt, answer_vocab):
             words.remove("<break>")
         pred_list.append(" ".join(words))
 
+    #  # for sampling answer
+    # ans_voc_sampling = []
+    # for k, _ in answer_vocab.items():
+    #     ans_voc_sampling.append(k)
+
+    # use sampling method to product the predicted answer
+    # pred_positive = np.exp(pred)
+
+    # for i in range(pred.shape[0]):
+    #     a_idx = choice(opt.NUM_OUTPUT_UNITS, size=opt.MAX_WORDS_IN_ANSWER, replace=False, p=pred_positive[i, :])
+    #     words = [ans_voc_sampling[x] for x in a_idx]
+    #     if("<END>" in words):
+    #         words = words[:words.index("<END>")]
+    #     if("<START>" in words):
+    #         words.remove("<START>")
+    #     if("<UNKNOWN>" in words):
+    #         words.remove("<UNKNOWN>")
+    #     if("<break>" in words):
+    #         words.remove("<break>")
+    #     pred_list.append(" ".join(words))
+
     # save the prediction to a csv file
     pred_df = q_a_i_df[["q_id", "img_id"]]
     pred_df["pred"] = pred_list
     pred_df.to_csv(os.path.join(root_path, "valid/prediction.csv"), sep="\t", header=None, index=None)
 
     # compute two metrics
-    gt_file_path = os.path.join(root_path, "valid/VQAMed2018valid-QA.csv")
+    # create the formated validation csv file
+    if(~os.path.isfile(os.path.join(root_path, "valid/ground_truth_valid.csv"))):
+        q_a_i_df[["q_id", "img_id", "answer"]].to_csv(os.path.join(root_path, "valid/ground_truth_valid.csv"), sep="\t", header=None, index=None)
+
+    gt_file_path = os.path.join(root_path, "valid/ground_truth_valid.csv")
     submission_file_path = os.path.join(root_path, "valid/prediction.csv")
     _client_payload = {}
     _client_payload["submission_file_path"] = submission_file_path

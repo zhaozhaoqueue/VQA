@@ -145,7 +145,7 @@ class VqaMedEvaluator:
     """
 
     def compute_wbss(self, predictions):
-        nltk.download('wordnet')
+        # nltk.download('wordnet')
         count = 0
         totalscore_wbss = 0.0
         for tuple1, tuple2 in zip(self.gt, predictions):
@@ -266,8 +266,8 @@ class VqaMedEvaluator:
         # NLTK
         # Download Punkt tokenizer (for word_tokenize method)
         # Download stopwords (for stopword removal)
-        nltk.download('punkt')
-        nltk.download('stopwords')
+        # nltk.download('punkt')
+        # nltk.download('stopwords')
 
         # English Stopwords
         stops = set(stopwords.words("english"))
